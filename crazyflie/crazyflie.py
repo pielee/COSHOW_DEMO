@@ -23,12 +23,13 @@
   - land 는 고도만 0 으로 내린다. 실기처럼 모터가 꺼지지는 않는다.
 
 실행:
-  python3 fake_crazyflie.py
-  python3 fake_crazyflie.py --ros-args -p config:=/path/to/config.yaml
+  python3 crazyflie/crazyflie.py
+  python3 crazyflie/crazyflie.py --ros-args -p config:=/path/to/other.yaml
 """
 import math
 import threading
 import time
+import pathlib
 from pathlib import Path
 
 import rclpy
@@ -41,6 +42,15 @@ from builtin_interfaces.msg import Duration as DurationMsg  # noqa: F401  (요�
 from geometry_msgs.msg import PoseStamped
 from crazyflie_interfaces.msg import LogDataGeneric, Status
 from crazyflie_interfaces.srv import Arm, GoTo, Land, Takeoff
+
+def _default_config():
+    """config/config.yaml 의 경로. 노드는 <루트>/<폴더>/x.py, 설정은 <루트>/config/ 에 있다."""
+    here = pathlib.Path(__file__).resolve().parent
+    for cand in (here.parent / 'config' / 'config.yaml', here / 'config.yaml'):
+        if cand.is_file():
+            return str(cand)
+    return str(here.parent / 'config' / 'config.yaml')   # 없으면 이 경로로 명확히 실패하게 둔다
+
 
 # status 비트 (crazyflie_interfaces/msg/Status.msg 의 상수와 같다)
 CAN_BE_ARMED, IS_ARMED, AUTO_ARM, CAN_FLY, IS_FLYING = 1, 2, 4, 8, 16
@@ -56,7 +66,7 @@ def _secs(duration_msg):
 class FakeCrazyflie(Node):
     def __init__(self):
         super().__init__('fake_crazyflie')
-        self.declare_parameter('config', str(Path(__file__).resolve().parent / 'config.yaml'))
+        self.declare_parameter('config', _default_config())
         cfg = yaml.safe_load(Path(self.get_parameter('config').value).read_text(encoding='utf-8'))
         d = cfg['drones']
         self.names = [d['mission']] + list(d['searchers'])

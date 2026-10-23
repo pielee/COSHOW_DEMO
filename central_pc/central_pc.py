@@ -26,12 +26,13 @@
   10 finder 복귀·착륙 ∥ limo_b 기지 복귀 → 완료
 
 실행:
-  python3 central_pc.py
-  python3 central_pc.py --ros-args -p config:=/path/to/config.yaml
+  python3 central_pc/central_pc.py
+  python3 central_pc/central_pc.py --ros-args -p config:=/path/to/other.yaml
 """
 import json
 import math
 import time
+import pathlib
 from pathlib import Path
 
 import rclpy
@@ -50,6 +51,15 @@ from std_msgs.msg import String
 from coshow_interfaces.msg import MarkerDetections
 from crazyflie_interfaces.srv import GoTo, Land, Takeoff
 
+def _default_config():
+    """config/config.yaml 의 경로. 노드는 <루트>/<폴더>/x.py, 설정은 <루트>/config/ 에 있다."""
+    here = pathlib.Path(__file__).resolve().parent
+    for cand in (here.parent / 'config' / 'config.yaml', here / 'config.yaml'):
+        if cand.is_file():
+            return str(cand)
+    return str(here.parent / 'config' / 'config.yaml')   # 없으면 이 경로로 명확히 실패하게 둔다
+
+
 AIRBORNE_Z, LANDED_Z = 0.25, 0.08
 
 
@@ -67,7 +77,7 @@ def _dist(ax, ay, bx, by):
 class CentralPC(Node):
     def __init__(self):
         super().__init__('central_pc')
-        self.declare_parameter('config', str(Path(__file__).resolve().parent / 'config.yaml'))
+        self.declare_parameter('config', _default_config())
         cfg = yaml.safe_load(Path(self.get_parameter('config').value).read_text(encoding='utf-8'))
         self.cfg = cfg
         d, l, f, m, t = cfg['drones'], cfg['limos'], cfg['field'], cfg['markers'], cfg['timing']

@@ -26,13 +26,14 @@ world_x/world_y 에는 마커의 실제 좌표를 그대로 넣는다. 실기에
 여기서는 오차 없는 이상적인 검출로 둔다 (--noise 로 오차를 줄 수 있다).
 
 실행:
-  python3 fake_vision.py
-  python3 fake_vision.py --ros-args -p seed:=42 -p noise:=0.05
+  python3 vision/vision.py
+  python3 vision/vision.py --ros-args -p seed:=42 -p noise:=0.05
 """
 import math
 import random
 import threading
 import time
+import pathlib
 from pathlib import Path
 
 import cv2
@@ -47,13 +48,22 @@ from sensor_msgs.msg import CompressedImage
 from std_msgs.msg import Bool, Float32
 from coshow_interfaces.msg import MarkerDetection, MarkerDetections
 
+def _default_config():
+    """config/config.yaml 의 경로. 노드는 <루트>/<폴더>/x.py, 설정은 <루트>/config/ 에 있다."""
+    here = pathlib.Path(__file__).resolve().parent
+    for cand in (here.parent / 'config' / 'config.yaml', here / 'config.yaml'):
+        if cand.is_file():
+            return str(cand)
+    return str(here.parent / 'config' / 'config.yaml')   # 없으면 이 경로로 명확히 실패하게 둔다
+
+
 AIRBORNE_Z = 0.25
 
 
 class FakeVision(Node):
     def __init__(self):
         super().__init__('fake_vision')
-        self.declare_parameter('config', str(Path(__file__).resolve().parent / 'config.yaml'))
+        self.declare_parameter('config', _default_config())
         self.declare_parameter('seed', -1)          # -1 = 매번 다르게
         self.declare_parameter('noise', 0.0)        # 검출 좌표에 섞을 오차 (m)
         cfg = yaml.safe_load(Path(self.get_parameter('config').value).read_text(encoding='utf-8'))

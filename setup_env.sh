@@ -1,5 +1,5 @@
-# FAKE 실행 환경 — 터미널마다 한 번 source 한다.
-#   source ~/FAKE/setup_env.sh
+# COSHOW_DEMO 실행 환경 — 터미널마다 한 번 source 한다.
+#   source ~/COSHOW_DEMO/setup_env.sh
 #
 # 필요한 것: ROS 2 Humble + coshow_interfaces + crazyflie_interfaces
 # 워크스페이스 위치가 다르면 아래 두 변수를 바꾸거나, 미리 환경변수로 넣어 둔다.
@@ -10,7 +10,7 @@ set +u    # ROS setup.bash 는 미설정 변수를 건드린다. set -u 면 여�
 
 source /opt/ros/humble/setup.bash
 
-# FAKE 자체 워크스페이스를 가장 먼저 본다 (build_interfaces.sh 로 빌드한 것).
+# 이 저장소의 워크스페이스를 가장 먼저 본다 (build_interfaces.sh 로 빌드한 것).
 _FAKE_WS="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/interfaces"
 
 # coshow_interfaces (MarkerDetections)
@@ -59,7 +59,7 @@ for m in ('rclpy', 'yaml', 'cv2', 'numpy',
 if bad:
     print('  [실패] 못 찾는 모듈:', ', '.join(bad))
     if any('interfaces' in m for m in bad):
-        print('         메시지 패키지를 먼저 빌드하세요:  ~/FAKE/build_interfaces.sh')
+        print('         메시지 패키지를 먼저 빌드하세요:  ~/COSHOW_DEMO/build_interfaces.sh')
     else:
         print('         pip 로 설치하세요 (cv2 -> opencv-python, yaml -> pyyaml)')
 else:

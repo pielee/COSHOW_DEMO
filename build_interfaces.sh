@@ -31,4 +31,4 @@ fi
 
 colcon build $SKIP --cmake-args -DPython3_EXECUTABLE=/usr/bin/python3
 echo
-echo "완료. 이제 터미널마다:  source ~/FAKE/setup_env.sh"
+echo "완료. 이제 터미널마다:  source ~/COSHOW_DEMO/setup_env.sh"
