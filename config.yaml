@@ -1,0 +1,52 @@
+# COSHOW 가짜 시나리오 설정 — fake_crazyflie / fake_vision / central_pc 가 함께 읽는다.
+# 좌표계는 map, 단위는 m·초. 실기 리허설 설정(coshow_rehearsal.yaml, field.yaml)에서 가져왔다.
+
+drones:
+  # mission = 미션 마커를 읽는 드론. searchers = 구역을 도는 드론.
+  mission: cf230
+  searchers: [cf231, cf232, cf233]
+  base:                       # 이륙·착륙 자리 (= 실기 crazyflies.yaml 의 initial_position)
+    cf230: [-1.0,  0.0]
+    cf231: [-1.5,  1.5]
+    cf232: [-1.5,  0.0]
+    cf233: [-1.5, -1.5]
+  altitude:                   # 단계별 고도
+    cf230: {takeoff: 0.7, observe: 0.7, capture: 0.7, return: 0.5}
+    cf231: {takeoff: 0.6, search: 0.6, capture: 0.6, return: 0.6}
+    cf232: {takeoff: 0.8, search: 0.8, capture: 0.8, return: 0.8}
+    cf233: {takeoff: 0.9, search: 1.0, capture: 1.0, return: 1.0}
+
+limos:
+  observer: limo_a            # 관측점으로 먼저 나가는 리모
+  rescuer:  limo_b            # 구조하러 가는 리모
+  base:
+    limo_a: [1.5,  1.5]
+    limo_b: [1.5, -1.5]
+
+field:
+  observe_point: [0.0, 0.0]   # 미션 마커가 놓인 자리. 미션 드론이 이 위를 호버한다.
+  # 탐색 구역. 드론은 x 를 왕복하며 레인 중앙 y 를 유지한다 (실기와 같은 lawnmower).
+  zones:
+    cf231: {x: [0.0, 1.5], y:  1.5}
+    cf232: {x: [0.0, 1.5], y:  0.0}
+    cf233: {x: [0.0, 1.5], y: -1.5}
+
+markers:
+  mission_id: 11              # 미션 마커 ID
+  id_offset: 10               # target_id = mission_id - id_offset
+  detect_radius: 0.45         # 드론 수평거리가 이 안이면 카메라에 잡힌다
+  mission_delay_max: 5.0      # 미션 드론 도착 후 이 시간 안에 랜덤하게 인식
+  frame_rate: 2.8             # 실기 AI-deck v4.2 실측 중앙값(5초에 14장). 검출 발행 주기 = 카메라 fps
+
+timing:
+  takeoff_sec: 3.0            # 이륙 소요
+  land_sec: 3.0               # 착륙 소요
+  goto_short_sec: 4.0         # 1 m 이하 이동
+  goto_long_sec: 8.0          # 그 이상
+  short_dist: 1.0
+  stagger_sec: 3.0            # 탐색 드론 순차 출격 간격
+  arrive_tol: 0.15            # 도착 판정 반경
+  arrive_hold: 1.0            # 그 안에 머물러야 하는 시간
+  limo_tol: 0.3
+  rescue_sec: 10.0            # 구조 리모 도착 후 대기
+  limo_approach_dx: 0.1       # 마커 자리에서 x+ 로 물러선 접근점 (건물 회피)

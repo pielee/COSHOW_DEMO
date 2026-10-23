@@ -1,0 +1,7 @@
+# colcon 빌드 산출물 — build_interfaces.sh 로 각자 만든다
+interfaces/build/
+interfaces/install/
+interfaces/log/
+
+__pycache__/
+*.pyc
